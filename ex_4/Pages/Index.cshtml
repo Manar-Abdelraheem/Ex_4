@@ -1,0 +1,39 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Ingredients</th>
+            <th>Instructions</th>
+            <th>Categories</th>
+        </tr>
+        <tr>
+        </tr>
+    </table>
+</div>
+<p><button class="btn btn-primary" id="id">Load</button></p>
+<div id="grid"></div>
+@section scripts{
+    <script>
+        //document.getElementsByTagName("button").addEventListener('click', () => {
+            fetch('https://localhost:7208/api/Recipes')
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {data.forEach(recipe =>{
+                    const markup = `<td>${recipe.title}</td>
+                    <td>${recipe.ingredients}</td>
+                    <td>${recipe.instructions}</td>
+                    <td>${recipe.categories}</td>`;
+                        document.querySelector("table").insertAdjacentHTML('beforeend',markup); 
+                });
+                });
+        //});
+    </script>
+}
