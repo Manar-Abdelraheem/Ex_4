@@ -1,5 +1,11 @@
 var builder = WebApplication.CreateBuilder(args);
 
+//builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ctx =>
+//{
+//    var problemCorrelationId = Guid.NewGuid().ToString();
+//    //log problemCorrelationId into logging system
+//    ctx.ProblemDetails.Instance = problemCorrelationId;
+//});
 // Add services to the container.
 builder.Services.AddRazorPages();
 

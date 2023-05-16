@@ -3,37 +3,141 @@
 @{
     ViewData["Title"] = "Home page";
 }
-
-<div class="text-center">
+<head>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
+</head>
+<body>
     <h1 class="display-4">Welcome</h1>
-    <table>
+    <div x-data="{recipes: getRecipes(), titleInput:'', ingredientsInput:'', instructionsInput:'', categoriesInput:''}" class="text-center">
+        <form id="form" class="form-inline" method="POST">
+        <label for="title">Title:</label>
+            <input x-model="titleInput" id="title" placeholder="Enter recipe title" type="text">
+            <label for="ingredients">Ingredients:</label>
+            <input x-model="ingredientsInput" id="ingredients" placeholder="Enter ingredients" type="text" @*name="ingredients"*@>
+        <label for="instructions">Instructions:</label>
+            <input x-model="instructionsInput" id="instructions" placeholder="Enter instructions" type="text" @* name="instructions"*@>
+        <label for="categories">Categories:</label>
+            <input x-model="categoriesInput" id="categories" placeholder="Enter categories" type="text" @*name="categories"*@>
+           @* <button type="submit" x-on:click="postRecipe()" class="btn btn-primary">Add</button>*@
+            <button x-on:click="recipes.push({title:titleInput, ingredients:ingredientsInput, instructions: instructionsInput, categories:categoriesInput }); postRecipe(); " type="submit" class="btn btn-primary">Add</button>
+       </form>
+            <table>
+                <tr>
+                    <th>Title</th>
+                    <th>Ingredients</th>
+                    <th>Instructions</th>
+                    <th>Categories</th>
+                </tr>
+              <template x-for="recipe in recipes">
+                <tr>
+                    <td x-text="recipe.title"></td>
+                    <td x-text="recipe.ingredients"></td>
+                    <td x-text="recipe.instructions"></td>
+                    <td x-text="recipe.categories"></td>
+                </tr>
+              </template>
+            </table>
+@*    <table>
         <tr>
             <th>Title</th>
             <th>Ingredients</th>
             <th>Instructions</th>
             <th>Categories</th>
         </tr>
-        <tr>
+        <tr x-for="recipe in recipes">
+                <td x-text="recipe.title"></td>
+                <td x-text="recipe.ingredients"></td>
+                <td x-text="recipe.instructions"></td>
+                <td x-text="recipe.categories"></td>
         </tr>
-    </table>
+    </table>*@
 </div>
-<p><button class="btn btn-primary" id="id">Load</button></p>
-<div id="grid"></div>
+</body>
+
+  
+
 @section scripts{
     <script>
-        //document.getElementsByTagName("button").addEventListener('click', () => {
-            fetch('https://localhost:7208/api/Recipes')
+
+    </script>
+    <script>
+        function getRecipes(){
+            const fromDb = null;
+            const recipesList = fromDb || [];
+        fetch('https://localhost:7208/api/Recipes')
                 .then((response) => {
                     return response.json();
                 })
-                .then((data) => {data.forEach(recipe =>{
-                    const markup = `<td>${recipe.title}</td>
-                    <td>${recipe.ingredients}</td>
-                    <td>${recipe.instructions}</td>
-                    <td>${recipe.categories}</td>`;
-                        document.querySelector("table").insertAdjacentHTML('beforeend',markup); 
-                });
-                });
-        //});
+                .then((data) => {data.forEach(recipe=>{recipesList.push(recipe);});});
+                console.log(recipesList);
+                return recipesList;
+        }
+
     </script>
+    <script>
+        function postRecipe() {
+            var form = document.getElementById('form')
+            form.addEventListener('submit', function (e) {
+                e.preventDefault()
+                var title = document.getElementById('title').value
+                var ingredients = document.getElementById('ingredients').value
+                var instructions = document.getElementById('instructions').value
+                var categories = document.getElementById('categories').value
+                fetch('https://localhost:7208/api/Recipes', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title: title,
+                        ingredients: ingredients,
+                        instructions: instructions,
+                        categories: categories,
+
+                    }),
+                    headers: {
+                        'Content-type': 'application/json; charset=UTF-8',
+                    }
+                })
+                    .then(function (response) {
+                        return response.json()
+                    })
+                    .then(function (data) {
+                        console.log(data)
+                        title = document.getElementById("title")
+                        ingredients = document.getElementById("ingredients")
+                        instructions = document.getElementById("instructions")
+                        categories = document.getElementById("categories")
+                        title.innerHTML = data.title
+                        ingredients.innerHTML = data.ingredients
+                        instructions.innerHTML = data.instructions
+                        categories.innerHTML = data.categories
+                    }).catch(error => console.error('Error:', error));
+            });
+       }
+
+    </script>
+@*    <script>
+        fetch('https://localhost:7208/api/Recipes', {
+            method: 'POST',
+            body: JSON.stringify(document.querySelector("form"),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        })
+            .then((response) => response.json())
+            .then((json) => console.log(json));
+    </script>*@
+
+    @*        fetch('https://localhost:7208/api/Recipes')
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    data.forEach(recipe => {
+                        const markup = `<td>${recipe.title}</td>
+                            <td>${recipe.ingredients}</td>
+                            <td>${recipe.instructions}</td>
+                            <td>${recipe.categories}</td>`;
+                        document.querySelector("table").insertAdjacentHTML('beforeend', markup);
+                    });
+                });*@
 }
+
