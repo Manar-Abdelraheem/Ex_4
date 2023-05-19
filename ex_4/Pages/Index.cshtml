@@ -4,77 +4,69 @@
     ViewData["Title"] = "Home page";
 }
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>
 </head>
 <body>
-    <h1 class="display-4">Welcome</h1>
-    <div x-data="{recipes: getRecipes(), titleInput:'', ingredientsInput:'', instructionsInput:'', categoriesInput:''}" class="text-center">
-        <form id="form" class="form-inline" method="POST">
-        <label for="title">Title:</label>
-            <input x-model="titleInput" id="title" placeholder="Enter recipe title" type="text">
-            <label for="ingredients">Ingredients:</label>
-            <input x-model="ingredientsInput" id="ingredients" placeholder="Enter ingredients" type="text" @*name="ingredients"*@>
-        <label for="instructions">Instructions:</label>
-            <input x-model="instructionsInput" id="instructions" placeholder="Enter instructions" type="text" @* name="instructions"*@>
-        <label for="categories">Categories:</label>
-            <input x-model="categoriesInput" id="categories" placeholder="Enter categories" type="text" @*name="categories"*@>
-           @* <button type="submit" x-on:click="postRecipe()" class="btn btn-primary">Add</button>*@
-            <button x-on:click="recipes.push({title:titleInput, ingredients:ingredientsInput, instructions: instructionsInput, categories:categoriesInput }); postRecipe(); " type="submit" class="btn btn-primary">Add</button>
-       </form>
-            <table>
+    <h1 class="display-4" >Welcome</h1>
+    <div x-data="recipeList= getRecipes() " x-init="init()" class="box">
+            <table id="recipes">
                 <tr>
                     <th>Title</th>
                     <th>Ingredients</th>
                     <th>Instructions</th>
                     <th>Categories</th>
+                    <th>Delete</th>
                 </tr>
-              <template x-for="recipe in recipes">
-                <tr>
-                    <td x-text="recipe.title"></td>
-                    <td x-text="recipe.ingredients"></td>
-                    <td x-text="recipe.instructions"></td>
-                    <td x-text="recipe.categories"></td>
-                </tr>
-              </template>
-            </table>
-@*    <table>
-        <tr>
-            <th>Title</th>
-            <th>Ingredients</th>
-            <th>Instructions</th>
-            <th>Categories</th>
-        </tr>
-        <tr x-for="recipe in recipes">
-                <td x-text="recipe.title"></td>
+                <template x-for="recipe in recipeList">
+                <tr >
+                <td x-text="recipe.title" ></td>
                 <td x-text="recipe.ingredients"></td>
                 <td x-text="recipe.instructions"></td>
                 <td x-text="recipe.categories"></td>
-        </tr>
-    </table>*@
+                    <td>
+                        <button class="btn" x-on:click="deleteRecipe(recipe.id)">
+                            <i class="fa fa-trash"></i> delete
+                        </button>
+                    </td>
+                </tr>
+                    </template>
+            </table>
+            </div>
+    <h2>Add a recipe</h2>
+    <div x-data="{recipes: [] , titleInput:'', ingredientsInput:'', instructionsInput:'', categoriesInput:''}" class="box">
+        <form id="form" class="form-inline" method="POST">
+        <label for="title">Title:</label>
+            <input x-model="titleInput" id="title" placeholder="Enter recipe title" type="text">
+            <label for="ingredients">Ingredients:</label>
+            <input x-model="ingredientsInput" id="ingredients" placeholder="Enter ingredients" type="text" >
+        <label for="instructions">Instructions:</label>
+            <input x-model="instructionsInput" id="instructions" placeholder="Enter instructions" type="text">
+        <label for="categories">Categories:</label>
+            <input x-model="categoriesInput" id="categories" placeholder="Enter categories" type="text">
+            <button type="submit" x-on:click="postRecipe(); location.reload();" class="btn btn-primary">Add</button>
+       </form>
 </div>
 </body>
 
   
 
 @section scripts{
-    <script>
-
-    </script>
-    <script>
+<script>
         function getRecipes(){
-            const fromDb = null;
-            const recipesList = fromDb || [];
-        fetch('https://localhost:7208/api/Recipes')
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data) => {data.forEach(recipe=>{recipesList.push(recipe);});});
-                console.log(recipesList);
-                return recipesList;
-        }
+            return {
 
-    </script>
-    <script>
+                recipeList:[],
+
+                init(){
+                   fetch('https://localhost:7208/api/Recipes')
+                        .then (response => response.json())
+                        .then( data =>  this.recipeList = data)
+                }
+            }
+        }
+</script>
+<script>
         function postRecipe() {
             var form = document.getElementById('form')
             form.addEventListener('submit', function (e) {
@@ -112,32 +104,21 @@
                     }).catch(error => console.error('Error:', error));
             });
        }
-
-    </script>
-@*    <script>
-        fetch('https://localhost:7208/api/Recipes', {
-            method: 'POST',
-            body: JSON.stringify(document.querySelector("form"),
-            headers: {
-                'Content-type': 'application/json; charset=UTF-8',
-            },
-        })
-            .then((response) => response.json())
-            .then((json) => console.log(json));
-    </script>*@
-
-    @*        fetch('https://localhost:7208/api/Recipes')
-                .then((response) => {
-                    return response.json();
-                })
-                .then((data) => {
-                    data.forEach(recipe => {
-                        const markup = `<td>${recipe.title}</td>
-                            <td>${recipe.ingredients}</td>
-                            <td>${recipe.instructions}</td>
-                            <td>${recipe.categories}</td>`;
-                        document.querySelector("table").insertAdjacentHTML('beforeend', markup);
-                    });
-                });*@
+</script>
+<script>
+        function deleteRecipe(inputId) {
+            var id = inputId;
+            if (confirm("You are about to delete the recipe, are you sure?")) {
+                fetch('https://localhost:7208/api/Recipes/' + id, {
+                    method: 'DELETE',
+                });
+                alert("Successfully deleted");
+                location.reload();
+            } 
+            else {
+                location.reload();
+            }
+        }
+</script>
 }
 
